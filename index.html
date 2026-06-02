@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Joaquin's Advice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="styles.css">
+
+</head>
+<body>
+  <div class="crt"></div>
+
+  <!-- TITLE SCREEN -->
+  <div class="screen" id="titleScreen">
+    <div class="title">Joaquin<span class="apos">'</span>s Advice</div>
+    <div class="tagline" id="tagline"></div>
+    <div class="menu" id="titleMenu"></div>
+  </div>
+
+  <!-- SETTINGS SCREEN -->
+  <div class="screen hide" id="settingsScreen">
+    <div class="title" style="font-size:clamp(30px,6vw,60px)">Settings</div>
+    <div class="menu" id="settingsMenu"></div>
+  </div>
+
+  <!-- START PLACEHOLDER -->
+  <div class="screen hide" id="startScreen">
+    <div class="tagline pad" style="color:var(--white);font-size:clamp(16px,3vw,26px);letter-spacing:.04em;max-width:30ch">
+      The first piece of advice is the hardest to give.
+    </div>
+    <div class="menu" id="startMenu"></div>
+  </div>
+
+  <!-- QUIT BLACKOUT -->
+  <div class="blackout" id="blackout">
+    <div class="line">. . .</div>
+    <div class="sub" id="quitSub">[ press Enter ]</div>
+  </div>
+
+  <div class="hints" id="hints"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
