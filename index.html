@@ -13,10 +13,11 @@
 </head>
 <body>
   <div class="crt"></div>
+  <div id="fx"></div>
 
   <!-- TITLE SCREEN -->
   <div class="screen" id="titleScreen">
-    <div class="title">Joaquin<span class="apos">'</span>s Advice</div>
+    <div class="title" id="title"><span class="word">Joaquin<span class="apos">'</span>s</span> <span class="word">Advice</span></div>
     <div class="tagline" id="tagline"></div>
     <div class="menu" id="titleMenu"></div>
   </div>
@@ -33,6 +34,26 @@
       The first piece of advice is the hardest to give.
     </div>
     <div class="menu" id="startMenu"></div>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div class="screen hide" id="gameScreen">
+    <div class="dayhud" id="dayHud">Day 1</div>
+
+    <div class="client">
+      <div class="portrait" id="portrait"></div>
+      <div class="nameplate" id="clientName"></div>
+    </div>
+
+    <div class="dialogue" id="dialogue"></div>
+
+    <div class="prompt" id="advicePrompt">What do you tell them?</div>
+    <div class="menu advice" id="adviceMenu"></div>
+
+    <div class="result hide" id="result">
+      <div class="result-text" id="resultText"></div>
+      <div class="result-go" id="resultGo">[ press Enter ]</div>
+    </div>
   </div>
 
   <!-- QUIT BLACKOUT -->
