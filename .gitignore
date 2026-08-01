@@ -1,2 +1,5 @@
 # Personal Claude Code settings (machine-specific, not for sharing)
 .claude/settings.local.json
+.DS_Store
+.playwright-mcp/
+*.xmp

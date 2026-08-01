@@ -1,3 +1,15 @@
+  /* Pixel Operator (CC0, bundled in fonts/) — the Undertale-style dialogue font */
+  @font-face{
+    font-family:'Pixel Operator';
+    src:url('fonts/PixelOperator.ttf') format('truetype');
+    font-weight:400;font-style:normal;font-display:block;
+  }
+  @font-face{
+    font-family:'Pixel Operator';
+    src:url('fonts/PixelOperator-Bold.ttf') format('truetype');
+    font-weight:700;font-style:normal;font-display:block;
+  }
+
   :root{
     --bg:#000000;
     --white:#ffffff;
@@ -10,7 +22,8 @@
   body{
     background:var(--bg);
     color:var(--white);
-    font-family:'Pixelify Sans',monospace;
+    font-family:'Pixel Operator',monospace;
+    font-weight:700;    /* Undertale uses the chunky bold cut of this font */
     overflow:hidden;
     -webkit-font-smoothing:none;
     image-rendering:pixelated;
@@ -22,7 +35,7 @@
 
   .crt{position:fixed;inset:0;z-index:2;pointer-events:none;opacity:0;
     transition:opacity .4s;
-    background:repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0px,rgba(255,255,255,.04) 1px,transparent 1px,transparent 3px);}
+    background:repeating-linear-gradient(0deg,rgba(0,0,0,.45) 0px,rgba(0,0,0,.45) 1px,transparent 1px,transparent 3px);}
   body.scan .crt{opacity:1}
 
   .screen{position:fixed;inset:0;z-index:1;display:flex;flex-direction:column;
@@ -73,7 +86,11 @@
     color:var(--dim);
     letter-spacing:.18em;
     min-height:1.2em;
+    text-align:left;            /* anchor the line so it never re-centers */
+    white-space:nowrap;
   }
+  /* fixed-width slot for the swapping word; prevents the line from shifting */
+  .tagline .swap{display:inline-block;text-align:left;min-width:11ch}
   .caret{display:inline-block;width:.55ch;background:var(--dim);
     animation:blink 1s steps(1) infinite;margin-left:1px}
   @keyframes blink{50%{opacity:0}}
@@ -94,24 +111,87 @@
     cursor:pointer;
     line-height:1.1;
     white-space:nowrap;
-    transition:color .05s;
+    transition:color .05s,transform .06s;
   }
+  .item:not(.option):active{transform:translateY(3px) scale(.98)}   /* press down on click */
   .item .pointer{position:absolute;left:0;opacity:0;color:var(--select);
     transform:translateX(-4px);transition:transform .08s,opacity .08s}
   .item.sel{color:var(--select)}
   .item.sel .pointer{opacity:1;transform:translateX(0)}
-  .item.option{display:flex;align-items:baseline;width:100%;text-align:left}
+  .item.option{display:flex;align-items:center;width:100%;text-align:left}
   .item.option .opt-label{flex:0 0 7em}
-  .item .val{color:var(--dim)}
+  .item .val{color:var(--dim);display:flex;align-items:center;gap:.6em}
   .item.sel .val{color:var(--select)}
+
+  /* ---- volume slider (Sound setting) ---- */
+  .item .slider{
+    position:relative;display:inline-block;
+    width:clamp(90px,22vw,140px);height:10px;
+    background:var(--dim2);vertical-align:middle;flex:0 0 auto;
+    cursor:pointer;touch-action:none;
+  }
+  /* a taller invisible hit-area so the thin bar is easy to grab */
+  .item .slider::before{content:'';position:absolute;left:0;right:0;top:-9px;bottom:-9px}
+  .item .slider .fill{
+    position:absolute;left:0;top:0;bottom:0;
+    background:var(--dim);transition:width .06s linear;
+  }
+  .item .slider .fill::after{   /* the knob */
+    content:'';position:absolute;right:-3px;top:-3px;bottom:-3px;width:6px;
+    background:var(--dim);
+  }
+  .item.sel .slider .fill,
+  .item.sel .slider .fill::after{background:var(--select)}
+  .item .num{
+    font-size:.62em;letter-spacing:.06em;
+    min-width:3ch;text-align:left;color:inherit;
+  }
 
   /* settings menu: fixed width so toggling a value never re-centers it */
   #settingsMenu{width:min(92vw,460px)}
+
+  /* save / load slots */
+  #slotsMenu{width:min(92vw,560px)}
+  #slotsMenu .item{font-size:clamp(15px,2.8vw,26px);white-space:normal;width:100%;text-align:left}
+  .slots-note{margin-top:clamp(14px,3vh,26px);color:var(--dim);letter-spacing:.1em;
+    font-size:clamp(12px,2.2vw,16px);min-height:1.2em;text-align:center}
 
   /* ---- footer hints ---- */
   .hints{position:fixed;bottom:22px;left:0;right:0;z-index:1;text-align:center;
     font-size:clamp(11px,2vw,15px);color:var(--dim2);letter-spacing:.12em}
   .hints b{color:var(--dim)}
+
+  /* ---- pause overlay ---- */
+  .pause{
+    position:fixed;inset:0;z-index:4;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:clamp(28px,6vh,56px);
+    background:rgba(0,0,0,.82);
+    opacity:0;pointer-events:none;transition:opacity .18s ease;
+  }
+  .pause.show{opacity:1;pointer-events:auto}
+  .pause-title{
+    color:var(--white);letter-spacing:.12em;
+    font-size:clamp(26px,6vw,52px);
+  }
+  .pause .menu{margin-top:0;opacity:1;animation:none}
+
+  /* ---- game over screen: Defeat.png fills the view ---- */
+  #gameOverScreen{padding:0;background:#000}
+  .gameover-art{position:absolute;inset:0;width:100%;height:100%;
+    object-fit:contain;image-rendering:pixelated}
+  .gameover-sub{display:none}
+  .gameover-go{display:none}   /* the hints bar already says how to leave */
+
+  /* ---- between-day transition card ---- */
+  .daycard{position:fixed;inset:0;z-index:7;background:#000;
+    display:flex;align-items:center;justify-content:center;
+    opacity:0;pointer-events:none;transition:opacity .5s ease}
+  .daycard.show{opacity:1;pointer-events:auto}
+  .daycard-text.punch{animation:dayPunch .45s cubic-bezier(.2,1.6,.35,1) both}
+  @keyframes dayPunch{0%{transform:scale(2.4);opacity:0}35%{opacity:1}100%{transform:scale(1)}}
+  .daycard-text{color:var(--white);letter-spacing:.12em;
+    font-size:clamp(40px,10vw,92px);}
 
   /* ---- quit / black screen ---- */
   .blackout{position:fixed;inset:0;z-index:3;background:#000;display:flex;
@@ -126,74 +206,367 @@
   /* placeholder start screen */
   .pad{padding:0 18px}
 
-  /* ============================================================
-     GAME SCREEN — the advice desk
-     ============================================================ */
-  #gameScreen{justify-content:flex-start;padding:clamp(20px,5vh,54px) 24px}
+  /* ---- name entry ---- */
+  /* ease into the name screen a little more gently than other screens */
+  #nameScreen{transition:opacity 1s ease}
+  .namefield{margin-top:clamp(34px,7vh,70px)}
+  #nameInput,#passInput{
+    background:transparent;border:none;outline:none;
+    font-family:inherit;color:var(--select);
+    font-size:clamp(24px,5vw,44px);letter-spacing:.08em;text-align:center;
+    caret-color:var(--select);
+    border-bottom:3px solid var(--dim2);
+    padding:8px 14px;min-width:9ch;max-width:90vw;
+    -webkit-font-smoothing:none;
+  }
+  #nameInput::placeholder,#passInput::placeholder{color:var(--dim2);letter-spacing:.06em}
+  #nameInput:focus,#passInput:focus{border-bottom-color:var(--select)}
+  #nameInput.shake,#passInput.shake{animation:wordShake .18s steps(3)}
 
-  .dayhud{
-    position:absolute;top:clamp(16px,3vh,30px);left:0;right:0;
-    text-align:center;color:var(--dim2);letter-spacing:.22em;
-    font-size:clamp(12px,2vw,16px);text-transform:uppercase;
+  /* greeting on the start screen */
+  .greeting{
+    color:var(--select);letter-spacing:.06em;
+    font-size:clamp(18px,3.4vw,30px);
+    margin-bottom:clamp(14px,2.5vh,22px);min-height:1.2em;
   }
 
-  /* ---- client portrait + nameplate ---- */
-  .client{display:flex;flex-direction:column;align-items:center;
-    gap:14px;margin-top:clamp(18px,5vh,46px)}
-  .portrait{
-    display:grid;gap:0;
-    width:min(34vw,160px);aspect-ratio:1;
-    image-rendering:pixelated;
-    filter:drop-shadow(0 0 10px rgba(255,255,255,.06));
+  /* ---- opening sequence (cutscene) ---- */
+  #openingScreen{justify-content:center}
+  .cutscene{
+    display:flex;flex-direction:column;align-items:center;
+    gap:clamp(20px,4vh,38px);width:min(92vw,560px);
   }
-  .portrait .px{width:100%;height:100%}
-  .portrait .on{background:var(--white)}
-  .nameplate{
-    color:var(--white);font-size:clamp(18px,3.4vw,30px);
-    letter-spacing:.08em;
+  /* image slot — 16:9 to match the 480x270 art; dashed = placeholder */
+  .cut-image{
+    width:min(82vw,640px);aspect-ratio:16/9;
+    border:2px solid transparent;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--dim2);letter-spacing:.2em;text-transform:uppercase;
+    font-size:clamp(10px,1.9vw,13px);
+    background:rgba(255,255,255,.02);
+    image-rendering:pixelated;overflow:hidden;
   }
-  .nameplate .sub{display:block;color:var(--dim);
-    font-size:.5em;letter-spacing:.16em;margin-top:6px}
-
-  /* ---- the client's problem ---- */
-  .dialogue{
-    margin-top:clamp(20px,4vh,40px);
-    max-width:46ch;min-height:4.5em;
-    color:var(--white);text-align:center;
-    font-size:clamp(15px,2.7vw,22px);line-height:1.5;letter-spacing:.02em;
+  .cut-image:not(:has(img,video)){border-color:var(--dim2);border-style:dashed}
+  .cut-image img{width:100%;height:100%;object-fit:cover;
+    image-rendering:pixelated;display:block}
+  .cut-image video{width:100%;height:100%;object-fit:contain;display:block;background:#000}
+  .cut-text{
+    width:min(82vw,640px);            /* same width as the image so left edges line up */
+    color:var(--white);text-align:left;
+    font-size:clamp(15px,2.7vw,22px);line-height:1.6;letter-spacing:.02em;
+    min-height:3.2em;
   }
-  .dialogue .caret{background:var(--white)}
-
-  /* ---- advice prompt + options ---- */
-  .prompt{
-    margin-top:clamp(18px,3vh,30px);color:var(--dim);
-    letter-spacing:.14em;font-size:clamp(13px,2.2vw,18px);
-    opacity:0;transition:opacity .35s;
-  }
-  .prompt.show{opacity:1}
-  .advice{
-    margin-top:clamp(14px,2.5vh,22px);align-items:center;
-    gap:clamp(10px,1.8vh,18px);
-    animation:none;opacity:1;
-  }
-  .advice .item{
-    font-size:clamp(15px,2.7vw,24px);
-    padding:0 1.6em;white-space:normal;text-align:center;
-    max-width:42ch;
-  }
-  .advice .item .pointer{left:.3em}
-  .advice.hide{display:none}
-
-  /* ---- consequence / result ---- */
-  .result{
-    margin-top:clamp(20px,4vh,40px);max-width:46ch;text-align:center;
-    display:flex;flex-direction:column;gap:22px;align-items:center;
-  }
-  .result.hide{display:none}
-  .result-text{
-    color:var(--select);font-size:clamp(15px,2.7vw,22px);
-    line-height:1.5;letter-spacing:.02em;
-  }
-  .result-go{color:var(--dim2);letter-spacing:.16em;
+  .cut-text .caret{background:var(--white)}
+  .cut-go{color:var(--dim2);letter-spacing:.16em;
     font-size:clamp(12px,2.2vw,15px);
     animation:blink 1.1s steps(1) infinite}
+  /* gentle fade as each panel arrives */
+  .cut-image.in,.cut-text.in{animation:cutIn .5s ease}
+  /* Joaquin's dialogue choices in the ending */
+  .end-choice{cursor:pointer;color:var(--dim);margin:.4em 0;line-height:1.45;transition:color .06s}
+  .end-choice:hover{color:var(--select)}
+  .end-choice b{color:var(--select);margin-right:.45em}
+  /* the finale image takes over the whole screen */
+  #endScreen.endfull .cut-image{position:fixed;inset:0;width:100vw;height:100vh;
+    max-width:none;aspect-ratio:auto;border:none;background:#000;z-index:2}
+  #endScreen.endfull .cut-image img{object-fit:contain}
+  #endScreen.endfull .end-title,#endScreen.endfull .cut-text{display:none}
+  #endScreen.endfull .cut-go{position:fixed;bottom:22px;left:0;right:0;z-index:3;text-align:center;color:var(--dim)}
+  @keyframes cutIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  /* ending cutscene title */
+  .end-title{
+    color:var(--select);letter-spacing:.16em;text-transform:uppercase;
+    font-size:clamp(16px,3.4vw,30px);
+    align-self:flex-start;margin-bottom:.1em;
+  }
+  .end-title.bad{color:#d9483b}
+  .end-title.secret{color:#e8c44a}
+  .end-title.normal{color:#7ac86f}   /* green, like the shirt */
+
+  /* ============================================================
+     GAME SCREEN — the gate (backdrop + % overlay zones)
+     Zone positions are % of the stage, tuned to art/backdrop.png.
+     They are easy to nudge if your art lines up slightly differently.
+     ============================================================ */
+  #gameScreen{justify-content:center;align-items:center;padding:0;background:#000}
+  .stage{
+    --stage-ar: 16 / 9;            /* set to your backdrop's real W / H */
+    position:relative;
+    aspect-ratio:var(--stage-ar);
+    width:min(100vw, calc(100vh * 16 / 9));
+    max-height:100vh;
+    background:#141414;            /* shows through if the backdrop is missing */
+    overflow:hidden;
+    image-rendering:pixelated;
+  }
+  .backdrop{position:absolute;inset:0;width:100%;height:100%;
+    object-fit:fill;image-rendering:pixelated;pointer-events:none}
+
+  /* generic overlay zone */
+  .zone{position:absolute;box-sizing:border-box}
+
+  /* day countdown — top centre of the screen */
+
+
+  /* day / seen / lives — top-right of the scene */
+  .tophud{position:absolute;right:1.5%;top:3.5%;z-index:5;
+    display:flex;flex-direction:column;align-items:flex-end;gap:.4em;
+    font-size:clamp(9px,1.3vw,14px);letter-spacing:.08em}
+  .tophud .chip{background:rgba(10,10,14,.62);border:1px solid rgba(255,255,255,.2);
+    border-radius:5px;padding:.14em .5em;color:#e9e9f2;text-transform:uppercase;
+    white-space:nowrap}
+  .tophud .chip b{color:#fff}
+  .tophud .hud-hearts{font-size:1.1em;letter-spacing:.1em}
+  .tophud .hud-hearts .hp-on{color:#e23b2e}
+  .tophud .hud-hearts .hp-off{color:rgba(255,255,255,.28)}
+  .tophud .hud-hearts.flash{animation:hpFlash .4s ease}
+
+  /* powerup bar (top-left of the scene) */
+  .powerbar{position:absolute;left:1.5%;top:3.5%;z-index:5;display:flex;gap:.5em}
+  .pow{display:flex;align-items:center;gap:.4em;cursor:pointer;font-family:inherit;border:none;
+    background:linear-gradient(#574463,#3c2d49);border-radius:6px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.15), inset 0 -2px 0 rgba(0,0,0,.32), 0 1px 2px rgba(0,0,0,.45);
+    color:#ece6f5;padding:.34em .58em;font-size:clamp(8px,1.2vw,13px);
+    letter-spacing:.06em;text-transform:uppercase;transition:filter .08s,transform .06s,box-shadow .06s}
+  .pow:hover{filter:brightness(1.14)}
+  .pow:active{transform:translateY(2px);filter:brightness(.95);box-shadow:inset 0 2px 4px rgba(0,0,0,.5)}
+  .pow.off{opacity:.45;pointer-events:none}
+  .pow .pow-n{background:rgba(255,233,0,.9);color:#000;border-radius:3px;
+    padding:0 .4em;font-weight:700;min-width:1.4em;text-align:center}
+  /* the golden ticket — same beveled button, but gold */
+  .pow.ticket{background:linear-gradient(#ffd54d,#e0a700);color:#3a2a00;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.5), inset 0 -2px 0 rgba(120,80,0,.4), 0 1px 2px rgba(0,0,0,.45)}
+  .pow.ticket .pow-n{background:rgba(0,0,0,.32);color:#ffe}
+
+  /* the waiting line: same sizing as the walker, slides forward as the line advances */
+  .queue{position:absolute;inset:0;pointer-events:none}
+  .queue .qspot{position:absolute;width:3.6%;aspect-ratio:1 / 1;
+    transform:translate(-50%,-50%);
+    transition:left .7s ease, top .7s ease, opacity .4s;
+    image-rendering:pixelated}
+  .queue .qspot img{width:100%;height:100%;object-fit:contain;display:block;
+    image-rendering:pixelated;
+    transform-origin:50% 88%;
+    animation:idleWiggle 1.6s ease-in-out infinite;
+    filter:drop-shadow(1px 0 0 #000) drop-shadow(-1px 0 0 #000)
+           drop-shadow(0 1px 0 #000) drop-shadow(0 -1px 0 #000)}   /* black outline */
+  @keyframes idleWiggle{
+    0%,100%{transform:rotate(-2deg) translateY(0)}
+    25%    {transform:rotate(.2deg) translateY(-4px)}   /* drift up... */
+    50%    {transform:rotate(2.2deg) translateY(0)}
+    75%    {transform:rotate(.2deg) translateY(2px)}    /* ...settle down */
+  }
+
+  /* the spirit walking the path — a ghost sprite (random per character) */
+  .walker{
+    position:absolute;left:14%;top:24%;
+    width:3.6%;aspect-ratio:1 / 1;transform:translate(-50%,-50%);
+    display:none;image-rendering:pixelated;
+  }
+  .walker .wghost{width:100%;height:100%;object-fit:contain;display:block;
+    image-rendering:pixelated;
+    filter:drop-shadow(1px 0 0 #000) drop-shadow(-1px 0 0 #000)
+           drop-shadow(0 1px 0 #000) drop-shadow(0 -1px 0 #000)}   /* black outline */
+  .walker.s-in  {animation:wkIn    1.6s ease-in-out both}
+  .walker.s-infar{animation:wkInFar 3s   ease-in-out both}   /* day's first spirit: full tunnel walk */
+  .walker.s-red {animation:wkRed  1.5s linear both}
+  .walker.s-plat{animation:wkPlat 1.6s linear both}
+  .walker.s-up  {animation:wkUp   1.9s ease-in both}
+  .walker.s-burn{animation:wkBurn 1.4s ease-in both}
+  /* approved: the beam pulls them up — the sprite brightens until it whites out */
+  .walker.good .wghost{animation:ghostBeam 1.9s ease-in both}
+  @keyframes ghostBeam{
+    0%  {filter:drop-shadow(0 0 8px rgba(255,235,160,.9)) brightness(1.05)}
+    55% {filter:drop-shadow(0 0 16px rgba(255,245,200,1)) brightness(1.6) saturate(.75)}
+    100%{filter:drop-shadow(0 0 22px rgba(255,255,235,1)) brightness(2.8) saturate(.25)}
+  }
+
+  /* the tractor beam itself: a shaft of light from the sky to the platform */
+  .beam{
+    position:absolute;left:85.8%;top:-2%;width:6%;height:35.5%;
+    transform:translateX(-50%);transform-origin:top;
+    background:
+      linear-gradient(90deg, rgba(255,175,45,.8) 0%, rgba(255,240,190,.25) 30%,
+                             rgba(255,240,190,.25) 70%, rgba(255,175,45,.8) 100%),
+      linear-gradient(180deg, rgba(255,215,100,0) 0%, rgba(255,205,85,.5) 22%,
+                              rgba(255,190,60,.75) 100%);
+    clip-path:polygon(34% 0, 66% 0, 100% 100%, 0 100%);   /* narrow up top, wide at the pad */
+    display:none;opacity:0;pointer-events:none;
+  }
+  .beam.on{display:block;animation:beamIn 1.9s ease-out both}
+  @keyframes beamIn{
+    0%  {opacity:0;transform:translateX(-50%) scaleY(0)}
+    10% {opacity:1;transform:translateX(-50%) scaleY(1)}     /* slams down from the sky */
+    30% {filter:brightness(1.2)}
+    50% {filter:brightness(.95)}
+    72% {filter:brightness(1.25);opacity:1}
+    100%{opacity:0;transform:translateX(-50%) scaleY(1)}     /* fades once they're gone */
+  }
+  /* denied: the sprite itself ignites and chars (colour via filters) */
+  .walker.bad .wghost{animation:ghostBurn 1.4s ease-in both}
+  @keyframes ghostBurn{
+    0%  {filter:drop-shadow(0 0 8px rgba(255,190,80,.85)) sepia(.6) saturate(3) hue-rotate(-12deg) brightness(1.1)}
+    40% {filter:drop-shadow(0 0 15px rgba(255,120,40,.95)) sepia(1) saturate(6) hue-rotate(-28deg) brightness(1.05)}
+    75% {filter:drop-shadow(0 0 8px rgba(200,70,20,.7)) sepia(1) saturate(4) hue-rotate(-32deg) brightness(.45)}
+    100%{filter:brightness(.15) saturate(.4)}
+  }
+  /* steps out from the front of the line and slips into the doorway
+     (the tunnel walk now belongs to newcomers joining the back of the line) */
+  @keyframes wkIn  {0%{left:37.5%;top:29.6%;opacity:1}
+    86%{left:46%;top:29.6%;opacity:1}             /* dead-straight to the door */
+    100%{left:47.5%;top:29.6%;opacity:0}}
+  /* the day's first spirit walks the whole way: tunnel, down, straight to the door */
+  @keyframes wkInFar{0%{left:15.2%;top:24%;opacity:0}8%{opacity:1}
+    30%{left:15.2%;top:29.6%}
+    88%{left:46%;top:29.6%;opacity:1}
+    100%{left:47.5%;top:29.6%;opacity:0}}
+  /* one lane height on both sides of the castle (y=29.6%); red line at x=71.1% */
+  @keyframes wkRed {0%{left:46%;top:29.6%}100%{left:71.1%;top:29.6%}}
+  /* flat at lane height the whole way onto the pad — no descent */
+  @keyframes wkPlat{0%{left:71.1%;top:29.6%}100%{left:85.8%;top:29.6%}}
+  /* beam-up: lift off the pad, hover weightless, stretch, then get yanked skyward */
+  @keyframes wkUp{
+    0%  {left:85.8%;top:29.6%;opacity:1;transform:translate(-50%,-50%) scale(1)}
+    22% {top:28%;transform:translate(-50%,-50%) scale(1.04,1.06) rotate(2deg)}
+    42% {top:26.8%;transform:translate(-50%,-50%) scale(.98,1.12) rotate(-2deg)}
+    62% {top:24.1%;opacity:1;transform:translate(-50%,-50%) scale(.92,1.3)}
+    100%{left:85.8%;top:-14%;opacity:0;transform:translate(-50%,-50%) scale(.45,2)}
+  }
+  /* denied: motion of the burn — flicker, sway, shrivel to ash (colour is on the img) */
+  @keyframes wkBurn{
+    0%  {left:85.8%;top:29.6%;opacity:1;transform:translate(-50%,-50%) scale(1)}
+    18% {transform:translate(-50%,-52%) scale(1.08,1.12) rotate(-2deg)}
+    36% {transform:translate(-50%,-51%) scale(.96,1.05) rotate(2deg)}
+    54% {transform:translate(-50%,-49%) scale(1.04,.9) rotate(-1deg)}
+    72% {transform:translate(-50%,-44%) scale(.75,.6)}
+    100%{left:85.8%;top:32%;opacity:0;transform:translate(-50%,-34%) scale(.4,.18)}
+  }
+
+  /* spirit portrait in the bottom-left alcove */
+  /* sized ~1.5x the original area; aspect kept ≈ booth2.png (369x442) */
+  .z-portrait{left:4.3%;top:52%;width:16.9%;height:36.3%;
+    display:flex;align-items:center;justify-content:center;
+    opacity:0;transition:opacity .3s}
+  .z-portrait.show{opacity:1}
+  /* booth back wall (bricks) — fitted INSIDE booth2's frame opening, measured
+     from booth2.png's alpha: poles 14.4–22.2% / 90.8–97.6%, arch bar 10.9–17.6%,
+     ledge top 77.8%. Bricks span mid-bar to mid-bar so they tuck under the frame. */
+  .z-portrait .booth-back{position:absolute;left:18.3%;top:14.2%;width:75.9%;height:64.3%;
+    object-fit:fill;image-rendering:pixelated;pointer-events:none}
+  /* the sprite layer covers the brick wall and is MASKED by booth.png's alpha,
+     so sprites (and their backgrounds) can never paint outside the arch */
+  .z-portrait .portrait-inner{position:absolute;left:18.3%;top:14.2%;width:75.9%;height:64.3%;
+    display:flex;align-items:flex-end;justify-content:center;overflow:hidden;
+    -webkit-mask-image:url('art/booth.png');-webkit-mask-size:100% 100%;-webkit-mask-repeat:no-repeat;
+    mask-image:url('art/booth.png');mask-size:100% 100%;mask-repeat:no-repeat}
+  .z-portrait .spirit-sprite{width:100%;height:100%;
+    object-fit:contain;object-position:center bottom;   /* stand on the ledge */
+    image-rendering:pixelated;
+    transform-origin:50% 90%;
+    animation:idleWiggle 2.3s ease-in-out infinite}     /* idle sway in the booth */
+  /* booth2 (arch frame + ledge) on top of the sprite, filling the zone
+     (zone aspect ≈ booth2 aspect, so fill ≈ no distortion) */
+  .z-portrait .booth2{position:absolute;inset:0;width:100%;height:100%;
+    object-fit:fill;image-rendering:pixelated;pointer-events:none}
+  .z-portrait .ph-label{color:rgba(255,255,255,.55);
+    letter-spacing:.16em;text-transform:uppercase;
+    font-size:clamp(9px,1.4vw,13px);
+    border:1px dashed rgba(255,255,255,.3);padding:.45em .6em}
+
+  /* main text panel (the parchment) — scrollable conversation log */
+  .z-main{left:27%;top:53%;width:43%;height:25%;
+    text-align:left;color:#2a1f16;cursor:pointer;padding:.25em;overflow:hidden}
+  .z-main .convo{height:100%;overflow-y:auto;
+    display:flex;flex-direction:column;gap:.45em;padding:.15em .5em .15em .25em}
+  .z-main .msg{font-size:clamp(11px,1.6vw,19px);line-height:1.4;letter-spacing:.01em}
+  .z-main .msg.spirit{color:#2a1f16}
+  .z-main .msg.you{color:#2f5170;font-style:italic;
+    align-self:flex-end;text-align:right;max-width:85%}   /* player's line, right-aligned */
+  .z-main .msg.decision{color:#5a3320}
+  .z-main .msg.verdict{font-weight:600;letter-spacing:.03em}
+  .z-main .msg.verdict.good{color:#2e7d32}
+  .z-main .msg.verdict.bad{color:#b3261e}
+  .z-main .msg.prompt{color:#6a4a35;letter-spacing:.1em}
+  .z-main .msg.ticket{color:#9a6b00;font-weight:600;font-style:italic}
+  .z-main .caret{background:#2a1f16}
+  /* thin scrollbar that suits the parchment */
+  .z-main .convo::-webkit-scrollbar{width:6px}
+  .z-main .convo::-webkit-scrollbar-thumb{background:rgba(60,40,20,.35);border-radius:3px}
+  .z-main .convo::-webkit-scrollbar-track{background:transparent}
+
+  /* dialogue options — solid purple buttons (cover the painted-in ones, so the
+     purple is part of the button and presses with it) */
+  .dlg-opt{border:none;cursor:pointer;font-family:inherit;
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    color:#f1e9fb;letter-spacing:.02em;line-height:1.2;
+    font-size:clamp(9px,1.35vw,16px);padding:0 1em;border-radius:10px;
+    background:linear-gradient(#5a4769,#3e2f4d);
+    box-shadow:inset 0 2px 0 rgba(255,255,255,.16), inset 0 -3px 0 rgba(0,0,0,.32), 0 3px 5px rgba(0,0,0,.45);
+    transition:filter .08s,transform .06s,box-shadow .06s}
+  .dlg-opt .lbl{display:block;overflow:hidden;max-height:100%}
+  .dlg-opt#opt1{left:25.5%;top:82.5%;width:22%;height:12%}
+  .dlg-opt#opt2{left:49%;top:82.5%;width:22%;height:12%}
+  .dlg-opt:hover{filter:brightness(1.13)}
+  .dlg-opt:active{transform:translateY(2px);filter:brightness(.95);box-shadow:inset 0 2px 5px rgba(0,0,0,.5)}
+  .dlg-opt.off{opacity:.4;pointer-events:none}
+
+  /* approve / deny — solid green & red buttons */
+  .decide{cursor:pointer;font-family:inherit;border:none;border-radius:9px;
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;letter-spacing:.12em;text-transform:uppercase;font-size:clamp(9px,1.35vw,16px);
+    box-shadow:inset 0 2px 0 rgba(255,255,255,.25), inset 0 -3px 0 rgba(0,0,0,.28), 0 2px 4px rgba(0,0,0,.4);
+    transition:filter .08s,transform .06s,box-shadow .06s}
+  /* board inner face (inside its black line) spans x 78.4–94.9%, y 52–95.2% —
+     keep the buttons inside it with a small margin */
+  .decide.approve{left:79.3%;top:79.5%;width:14.8%;height:6.6%;background:linear-gradient(#46b94e,#2e7d32)}
+  .decide.deny   {left:79.3%;top:87.2%;width:14.8%;height:6.6%;background:linear-gradient(#e1554c,#b3261e)}
+  .decide:hover{filter:brightness(1.1)}
+  .decide:active{transform:translateY(2px);filter:brightness(.95);
+    box-shadow:inset 0 2px 5px rgba(0,0,0,.45)}   /* pressed in */
+  .decide.off{opacity:.5;pointer-events:none}
+
+  /* the rules — always readable on a paper sheet pinned to the board */
+  .z-rules{left:79.3%;top:52%;width:14.8%;height:26%;
+    display:flex;align-items:stretch;justify-content:center;padding:0}
+  .paper-sheet{
+    position:relative;width:97%;padding:.4em .5em;
+    background:#f4ecd8;color:#3a2a18;
+    background-image:repeating-linear-gradient(180deg,
+      transparent 0 11px, rgba(120,90,50,.13) 11px 12px);    /* ruled lines */
+    border:2px solid #d8c9a8;
+    box-shadow:2px 3px 0 rgba(0,0,0,.35);
+    clip-path:polygon(0 0, calc(100% - 11px) 0, 100% 11px, 100% 100%, 0 100%);  /* folded corner */
+    transform:rotate(-1.2deg);
+    display:flex;flex-direction:column;overflow:hidden;
+  }
+  .paper-head{text-align:center;letter-spacing:.2em;text-transform:uppercase;
+    font-size:clamp(8px,1.1vw,13px);margin-bottom:.15em}
+  .paper-rules{margin:0 0 0 1.15em;padding:0;flex:1;overflow-y:auto;
+    text-align:left;font-size:clamp(8px,1.15vw,13px);line-height:1.3;
+    display:flex;flex-direction:column;gap:.3em;font-weight:400}
+  .paper-rules::-webkit-scrollbar{width:4px}
+  .paper-rules::-webkit-scrollbar-thumb{background:rgba(120,90,50,.4)}
+  /* the Power Goggles: the spirit's true name, revealed over the booth */
+  .spirit-name{display:none;position:absolute;left:0;right:0;top:3.5%;z-index:5;
+    text-align:center;color:var(--select);pointer-events:none;
+    font-size:clamp(8px,1.1vw,13px);letter-spacing:.08em;
+    text-shadow:1px 1px 0 #000,-1px 1px 0 #000,1px -1px 0 #000,-1px -1px 0 #000}
+  body.glasses .spirit-name{display:block}
+  #hudQuota.met{color:#6fdc74 !important}   /* all spirits seen */
+  @keyframes hpFlash{0%,100%{transform:none}30%{transform:scale(1.3)}60%{transform:scale(.92)}}
+
+  /* expanded rules overlay */
+  .rules-overlay{position:absolute;inset:0;z-index:6;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(0,0,0,.7);opacity:0;pointer-events:none;transition:opacity .18s}
+  .rules-overlay.show{opacity:1;pointer-events:auto}
+  .rules-panel{width:min(70%,520px);max-height:80%;overflow:auto;
+    background:#caa46a;border:3px solid #6a4a2a;border-radius:8px;
+    padding:clamp(16px,3vw,30px);color:#2a1f16;text-align:left}
+  .rules-panel .rules-head{letter-spacing:.16em;text-transform:uppercase;
+    font-size:clamp(14px,2.4vw,22px);margin-bottom:.8em}
+  .rules-full{margin:0 0 1em 1.2em;display:flex;flex-direction:column;gap:.7em;
+    font-size:clamp(12px,1.9vw,18px);line-height:1.4}
+  .rules-panel .rules-close{color:#6a4a35;letter-spacing:.12em;
+    font-size:clamp(11px,1.8vw,14px);text-align:center}

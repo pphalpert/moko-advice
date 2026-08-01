@@ -4,16 +4,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Joaquin's Advice</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-
 <link rel="stylesheet" href="styles.css">
 
 </head>
 <body>
   <div class="crt"></div>
   <div id="fx"></div>
+
+  <!-- PASSWORD GATE -->
+  <div class="screen hide" id="passScreen">
+    <div class="title" style="font-size:clamp(22px,5vw,46px)">Password</div>
+    <div class="namefield">
+      <input id="passInput" type="password" maxlength="24" autocomplete="off" spellcheck="false"
+             placeholder="enter the password">
+    </div>
+  </div>
 
   <!-- TITLE SCREEN -->
   <div class="screen" id="titleScreen">
@@ -28,32 +33,124 @@
     <div class="menu" id="settingsMenu"></div>
   </div>
 
-  <!-- START PLACEHOLDER -->
-  <div class="screen hide" id="startScreen">
-    <div class="tagline pad" style="color:var(--white);font-size:clamp(16px,3vw,26px);letter-spacing:.04em;max-width:30ch">
-      The first piece of advice is the hardest to give.
-    </div>
-    <div class="menu" id="startMenu"></div>
+  <!-- SAVE / LOAD SLOTS -->
+  <div class="screen hide" id="slotsScreen">
+    <div class="title" style="font-size:clamp(28px,6vw,56px)" id="slotsTitle">Load Game</div>
+    <div class="menu" id="slotsMenu"></div>
+    <div class="slots-note" id="slotsNote"></div>
   </div>
 
-  <!-- GAME SCREEN -->
+  <!-- NAME ENTRY -->
+  <div class="screen hide" id="nameScreen">
+    <div class="title" style="font-size:clamp(22px,5vw,46px)">What should I call you?</div>
+    <div class="namefield">
+      <input id="nameInput" type="text" maxlength="16" autocomplete="off"
+             autocapitalize="words" spellcheck="false" placeholder="type your name">
+    </div>
+  </div>
+
+  <!-- OPENING SEQUENCE (cutscene: image on top, text under) -->
+  <div class="screen hide" id="openingScreen">
+    <div class="cutscene">
+      <div class="cut-image" id="cutImage"></div>
+      <div class="cut-text" id="cutText"></div>
+      <div class="cut-go" id="cutGo">[ press Enter ]</div>
+    </div>
+  </div>
+
+  <!-- ENDING CUTSCENE (secret ending) -->
+  <div class="screen hide" id="endScreen">
+    <div class="cutscene">
+      <div class="end-title" id="endTitle"></div>
+      <div class="cut-image" id="endImage"></div>
+      <div class="cut-text" id="endText"></div>
+      <div class="cut-go" id="endGo">[ press Enter ]</div>
+    </div>
+  </div>
+
+  <!-- GAME OVER (bad end) -->
+  <div class="screen hide" id="gameOverScreen">
+    <img class="gameover-art" src="art/Defeat.png" alt=""
+         onerror="this.style.display='none'">
+    <div class="gameover-sub" id="gameOverSub"></div>
+    <div class="gameover-go">[ press Enter ]</div>
+  </div>
+
+  <!-- GAME SCREEN — the gate (backdrop + overlay zones) -->
   <div class="screen hide" id="gameScreen">
-    <div class="dayhud" id="dayHud">Day 1</div>
+    <div class="stage" id="stage">
+      <!-- main backdrop: save the supplied art as art/backdrop.png -->
+      <img class="backdrop" id="backdrop" src="art/backdrop.png" alt=""
+           onerror="this.style.display='none'">
 
-    <div class="client">
-      <div class="portrait" id="portrait"></div>
-      <div class="nameplate" id="clientName"></div>
+      <!-- day / seen / lives, top-right -->
+      <div class="tophud" id="topHud">
+        <span class="chip">Day <b id="hudDay">1</b></span>
+        <span class="chip">Seen <b id="hudQuota">0/8</b></span>
+        <span class="chip hud-hearts" id="hudHearts"></span>
+      </div>
+
+      <!-- heaven's tractor beam, lands on the platform when a spirit is approved -->
+      <div class="beam" id="beam"></div>
+
+      <!-- the waiting line of spirits on the path left of the castle -->
+      <div class="queue" id="queue"></div>
+
+      <!-- the spirit walking the path — a random ghost sprite per character -->
+      <div class="walker" id="walker"><img class="wghost" id="walkerImg" alt=""></div>
+
+      <!-- the one-time golden ticket -->
+      <div class="powerbar" id="powerbar">
+        <button class="pow ticket" id="powTicket" title="Give your golden ticket to this spirit">
+          <span class="pow-name">Ticket</span><span class="pow-n" id="powTicketN">1</span></button>
+      </div>
+
+      <!-- spirit portrait, shown in the bottom-left alcove (booth2 frames the sprite) -->
+      <div class="zone z-portrait" id="zPortrait">
+        <img class="booth-back" id="booth" src="art/booth.png" alt=""
+             onerror="this.style.display='none'">
+        <div class="portrait-inner" id="portraitInner"></div>
+        <img class="booth2" id="booth2" src="art/booth2.png" alt=""
+             onerror="this.style.display='none'">
+        <div class="spirit-name" id="spiritName"></div>
+      </div>
+
+      <!-- main text panel: a scrollable conversation log -->
+      <div class="zone z-main" id="zMain">
+        <div class="convo" id="convo"></div>
+      </div>
+
+      <!-- dialogue options (over the two baked middle buttons) -->
+      <button class="zone dlg-opt" id="opt1"><span class="lbl"></span></button>
+      <button class="zone dlg-opt" id="opt2"><span class="lbl"></span></button>
+
+      <!-- the rules, always readable on a paper sheet pinned to the board -->
+      <div class="zone z-rules" id="zRules">
+        <div class="paper-sheet">
+          <div class="paper-head">Rules</div>
+          <ol class="paper-rules" id="rulesList"></ol>
+        </div>
+      </div>
+
+      <!-- approve / deny, in the right area below the rules -->
+      <button class="zone decide approve" id="btnYes"><span>APPROVE</span></button>
+      <button class="zone decide deny"    id="btnNo"><span>DENY</span></button>
     </div>
 
-    <div class="dialogue" id="dialogue"></div>
-
-    <div class="prompt" id="advicePrompt">What do you tell them?</div>
-    <div class="menu advice" id="adviceMenu"></div>
-
-    <div class="result hide" id="result">
-      <div class="result-text" id="resultText"></div>
-      <div class="result-go" id="resultGo">[ press Enter ]</div>
+    <!-- expanded rules overlay -->
+    <div class="rules-overlay" id="rulesOverlay">
+      <div class="rules-panel">
+        <div class="rules-head">Rules &mdash; Day <span id="rulesDay">1</span></div>
+        <ol class="rules-full" id="rulesFull"></ol>
+        <div class="rules-close">[ tap or Esc to close ]</div>
+      </div>
     </div>
+  </div>
+
+  <!-- PAUSE MENU -->
+  <div class="pause" id="pauseScreen">
+    <div class="pause-title">Paused</div>
+    <div class="menu" id="pauseMenu"></div>
   </div>
 
   <!-- QUIT BLACKOUT -->
@@ -62,7 +159,13 @@
     <div class="sub" id="quitSub">[ press Enter ]</div>
   </div>
 
+  <!-- between-day transition card -->
+  <div class="daycard" id="dayCard"><div class="daycard-text" id="dayCardText">Day 1</div></div>
+
   <div class="hints" id="hints"></div>
+
+  <!-- TITLE / MENU MUSIC — drop your file at music/title.mp3 (or change the src) -->
+  <audio id="bgm" src="music/Joaco_s Please Title Card.mp3" loop preload="auto"></audio>
 
 <script src="script.js"></script>
 </body>
