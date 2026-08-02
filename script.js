@@ -561,7 +561,7 @@ const SPIRITS_DAY2 = [
     name: "Keira",
     good: true,
     denyGameOver: true,   // denying Keira is an automatic game over
-    sprite: "art/keira.png",
+    sprite: "art/Keira.png",
     dialogue: {
       start: { text:"Hi", opts:[
         { label:"Hi! How are you.", to:"day1" },
@@ -1182,7 +1182,7 @@ const SPIRITS_DAY3 = [
   {
     name: "ALB",
     good: true,
-    sprite: 'art/ALB.png',
+    sprite: 'art/ALLB.png',
     dialogue: {
       start: { text:"...", opts:[
         { label:"Hello? I can't let you through if you don't talk.", to:"ipad" },
